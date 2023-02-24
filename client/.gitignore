@@ -1,0 +1,28 @@
+# dependencies
+/node_modules
+
+# build output
+/build
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# editor files
+*.swp
+*.swo
+*.swn
+*.swm
+*.swl
+*.swk
+*.swd
+*.swx
+*.swh
+*.vscode/
+.idea/
+*.sublime-workspace
+
+# misc
+.DS_Store
+Thumbs.db

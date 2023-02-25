@@ -7,7 +7,7 @@ import axios from "axios";
 export default function Feed(dataa) {
   const [posts, setPosts] = useState([]);
   const fetch_posts = async () => {
-    const res = await fetch(`/api/posts/${dataa.userid}`, {
+    const res = await fetch(dataa.userid?`/api/posts/${dataa.userid}`:`/api/posts`, {
       method: "POST",
       headers: {
         Accept: "application/json",

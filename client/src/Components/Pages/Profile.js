@@ -6,13 +6,17 @@ import Rightbar from "../Templates/Rightbar/Rightbar"
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router";
-import { useSelector } from "react-redux";
+import Popup from  "../Templates/Profile/Profile"
+import { useSelector, useDispatch } from "react-redux";
+import { Profile_tog } from "../actions";
 
 import React from 'react'
 
 const Profile = () => {
+  const dispatch = useDispatch()
   // const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   const user = useSelector((state) => state.userdata);
+  const profile = useSelector((state)=> state.profile)
   // const username = useParams().username;
 
   // useEffect(() => {
@@ -25,6 +29,7 @@ const Profile = () => {
 
   return (
     <>
+    {profile.display?<Popup/>:""}
       <Topbar />
       <div className="profile">
         <Sidebar />
@@ -36,11 +41,15 @@ const Profile = () => {
                 src="/api/profilepic"
                 alt=""
               />
-              <img
+              <div className="prfl">
+                <div className="profile_upload" onClick={()=>{dispatch(Profile_tog())}}>
+                </div>
+                <img
                 className="profileUserImg"
                 src="/api/profilepic"
                 alt=""
               />
+              </div>
             </div>
             <div className="profileInfo">
               <h4 className="profileInfoName">{user.fullName}</h4>

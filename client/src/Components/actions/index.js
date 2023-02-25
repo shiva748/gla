@@ -48,3 +48,26 @@ export const validate = (data)=>{
     data:data,
   };
 }
+
+export const Profile_tog = ()=>{
+  return {
+    for:"profile",
+    type:"Profileoc"
+  }
+}
+
+export const Profile_sele = (data)=>{
+  return {
+    for:"profile",
+    type:"select",
+    data
+  }
+}
+
+export const post_edt = (data)=>{
+  return {
+    for:"post",
+    type:"edit",
+    data
+  }
+}

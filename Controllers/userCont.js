@@ -7,6 +7,8 @@ const path = require("path");
 const mime = require("mime");
 var randomstring = require("randomstring");
 const { error } = require("console");
+const Post = require("../Database/Models/post");
+const uniqid = require("uniqid");
 
 // === === === home === === === //
 
@@ -36,6 +38,7 @@ exports.user_singup = async (req, res) => {
         .json({ result: false, error: "Please enter a valid email" });
     }
     const user = new Usr({
+      userid: uniqid(),
       fullName,
       eml: email,
       password,
@@ -112,7 +115,10 @@ exports.login = async (req, res) => {
               expires: new Date(Date.now() + 432000000),
               httpOnly: true,
             })
-            .json({ result: true, data: { fullName: profile.fullName, email: profile.eml }});
+            .json({
+              result: true,
+              data: { fullName: profile.fullName, email: profile.eml },
+            });
         } else {
           return res
             .status(500)
@@ -191,45 +197,31 @@ exports.change_pass = async (req, res) => {
 exports.profile_pic = async (req, res) => {
   try {
     const user = req.user;
-    const { imagedata } = req.body;
-    const name = randomstring.generate(15);
+    const filename = req.files.profile.name;
+    const file = req.files.profile;
     if (
       !fs.existsSync(
-        path.join(__dirname, `../public/user/${user._id}/profile/`)
+        path.join(__dirname, `../public/user/${user.userid}/profile/`)
       )
     ) {
-      if (!fs.existsSync(path.join(__dirname, `../public/user/${user._id}/`))) {
-        fs.mkdirSync(path.join(__dirname, `../public/user/${user._id}/`));
+      if (
+        !fs.existsSync(path.join(__dirname, `../public/user/${user.userid}/`))
+      ) {
+        fs.mkdirSync(path.join(__dirname, `../public/user/${user.userid}/`));
       }
-      fs.mkdirSync(path.join(__dirname, `../public/user/${user._id}/profile/`));
+      fs.mkdirSync(
+        path.join(__dirname, `../public/user/${user.userid}/profile/`)
+      );
     }
-    let paths = `../public/user/${user._id}/profile/`;
-    var matches = imagedata.match(/^data:([A-Za-z-+/]+);base64,(.+)$/),
-      response = {};
+    let name = (await randomstring.generate(15)) + "." + filename.split(".")[1];
+    let paths = __dirname + `/../public/user/${user.userid}/profile/` + name;
 
-    if (matches.length !== 3) {
-      throw new Error ("invalid image");
-    }
-
-    response.type = matches[1];
-    response.data = Buffer.from(matches[2], "base64");
-    let decodedImg = response;
-    let imageBuffer = decodedImg.data;
-    let type = decodedImg.type;
-    let extension = mime.extension(type);
-    if (!["JPEG", "JPG", "PNG"].includes(extension.toUpperCase())) {
-      throw new Error("Invalid image extension");
-    }
-    let fileName = `${name}.` + extension;
-    fs.writeFileSync(
-      path.join(__dirname, paths, fileName),
-      imageBuffer,
-      "utf8"
-    );
-    const update = await Usr.updateOne(
-      { eml: user.eml },
-      { profile: fileName }
-    )
+    file.mv(paths, (err) => {
+      if (err) {
+        return res.send(err);
+      }
+    });
+    const update = await Usr.updateOne({ eml: user.eml }, { profile: name })
       .then((res) => {
         return res;
       })
@@ -240,29 +232,30 @@ exports.profile_pic = async (req, res) => {
       .status(201)
       .json({ result: true, message: "successfully uploaded" });
   } catch (error) {
-    res
-      .status(400)
-      .json({ result: false, error: error.message});
+    res.status(400).json({ result: false, message: "some error occured" });
   }
 };
 
-exports.send_profile = async(req, res)=>{
-  var user = req.user;
+exports.send_po = async (req, res) => {
+  var id = req.params.userid;
+  const user = await Usr.findOne(
+    { userid: id },
+    { profile: 1, _id: 0, userid: 1 }
+  )
+    .then((res) => {
+      return res;
+    })
+    .catch((err) => {
+      throw new Error(err);
+    });
   let options = {
-    root: path.join(
-      __dirname,
-      `../public/user/${user._id}/profile`
-    ),
+    root: path.join(__dirname, `../public/user/${user.userid}/profile`),
   };
-  let fileName = user.profile
+  let fileName = user.profile;
   if (
     !fileName ||
     !fs.existsSync(
-      path.join(
-        __dirname,
-        `../public/user/${user._id}/profile`,
-        fileName
-      )
+      path.join(__dirname, `../public/user/${user.userid}/profile`, fileName)
     )
   ) {
     options = {
@@ -271,4 +264,132 @@ exports.send_profile = async(req, res)=>{
     fileName = "pic.png";
   }
   res.sendFile(fileName, options);
+};
+
+exports.send_pp = async (req, res) => {
+  const user = req.user;
+  let options = {
+    root: path.join(__dirname, `../public/user/${user.userid}/profile`),
+  };
+  let fileName = user.profile;
+  if (
+    !fileName ||
+    !fs.existsSync(
+      path.join(__dirname, `../public/user/${user.userid}/profile`, fileName)
+    )
+  ) {
+    options = {
+      root: path.join(__dirname, "../public/user/default/"),
+    };
+    fileName = "pic.png";
+  }
+  res.sendFile(fileName, options);
+};
+
+exports.post = async (req, res) => {
+  try {
+    const user = req.user;
+    if (req.files) {
+      const file = req.files.file;
+      if (
+        !fs.existsSync(
+          path.join(__dirname, `../public/user/${user.userid}/post/`)
+        )
+      ) {
+        if (
+          !fs.existsSync(path.join(__dirname, `../public/user/${user.userid}/`))
+        ) {
+          fs.mkdirSync(path.join(__dirname, `../public/user/${user.userid}/`));
+        }
+        fs.mkdirSync(
+          path.join(__dirname, `../public/user/${user.userid}/post/`)
+        );
+      }
+      const filename = req.files.file.name;
+      var name =
+        (await randomstring.generate(15)) + "." + filename.split(".")[1];
+      let paths = __dirname + `/../public/user/${user.userid}/post/` + name;
+
+      file.mv(paths, (err) => {
+        if (err) {
+          return res.send(err);
+        }
+      });
+    }
+    const data = JSON.parse(req.body.data);
+    let obj = {
+      userid: user.userid,
+      fullName: user.fullName,
+      text: data.text,
+      stats: {
+        likes: 0,
+        comments: 0,
+      },
+      on: new Date(),
+      visiblity: "Public",
+      likes: [],
+      comments: [],
+    };
+    if (req.files) {
+      obj = {
+        ...obj,
+        Media: [
+          {
+            MDT: "T1",
+            url: name,
+          },
+        ],
+      };
+    }
+    const pst = new Post(obj);
+    const save = await pst
+      .save()
+      .then((res) => {
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
+    return res
+      .status(201)
+      .json({ result: true, message: "Posted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ result: false, error: "some error occured" });
+  }
+};
+
+exports.getposts = async (req, res) => {
+  try {
+    let records = await Post.find()
+    .then((res) => {
+      return res;
+    })
+    .catch((err) => {
+      throw new Error(err);
+    });
+  res.status(200).json({result:true, post:records})
+  } catch (error) {
+    res.status(400).json({result:false, message:"some error occured"})
+  }
+};
+
+exports.send_content = async(req, res)=>{
+  try {
+    const userid = req.params.userid
+  const contentname = req.params.contentname
+  if (
+    !fs.existsSync(
+      path.join(__dirname, `../public/user/${userid}/post/${contentname}`)
+    )
+  ) {
+    return res.status(400).json({result:false, message:"invalid request"})
+  }
+  let options = {
+    root: path.join(__dirname, `../public/user/${userid}/post`),
+  };
+  res.sendFile(contentname, options);
+  } catch (error) {
+    res.status(400).json({result:false, message:"invalid request"})
+  }
 }

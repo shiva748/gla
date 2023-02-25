@@ -1,82 +1,50 @@
 import "./post.css";
-import { MoreVert } from "@material-ui/icons";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { format } from "timeago.js";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
 
 export default function Post({ post }) {
-  const [like, setLike] = useState(post.likes.length);
-  const [isLiked, setIsLiked] = useState(false);
-  const [user, setUser] = useState({});
-  const PF = process.env.REACT_APP_PUBLIC_FOLDER;
-  const { user: currentUser } = useContext(AuthContext);
-
-  useEffect(() => {
-    setIsLiked(post.likes.includes(currentUser._id));
-  }, [currentUser._id, post.likes]);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const res = await axios.get(`/users?userId=${post.userId}`);
-      setUser(res.data);
-    };
-    fetchUser();
-  }, [post.userId]);
-
-  const likeHandler = () => {
-    try {
-      axios.put("/posts/" + post._id + "/like", { userId: currentUser._id });
-    } catch (err) {}
-    setLike(isLiked ? like - 1 : like + 1);
-    setIsLiked(!isLiked);
-  };
   return (
     <div className="post">
       <div className="postWrapper">
         <div className="postTop">
           <div className="postTopLeft">
-            <Link to={`/profile/${user.username}`}>
+            <Link to={`/profile/${post.userid}`}>
               <img
                 className="postProfileImg"
-                src={
-                  user.profilePicture
-                    ? PF + user.profilePicture
-                    : PF + "person/noAvatar.png"
-                }
+                src={`/api/profilepic/${post.userid}`}
                 alt=""
               />
             </Link>
-            <span className="postUsername">{user.username}</span>
-            <span className="postDate">{format(post.createdAt)}</span>
+            <span className="postUsername">{post.fullName}</span>
+            <span className="postDate">{new Date(post.on).toLocaleString()}</span>
           </div>
           <div className="postTopRight">
-            <MoreVert />
+          <i class="fa-solid fa-ellipsis-vertical"/>
           </div>
         </div>
         <div className="postCenter">
-          <span className="postText">{post?.desc}</span>
-          <img className="postImg" src={PF + post.img} alt="" />
+          <span className="postText">{post?.text}</span>
+          {
+            post.Media.map((itm)=> <img className="postImg" src={`/api/content/${post.userid}/${itm.url}`} alt="" />)
+          }
         </div>
         <div className="postBottom">
           <div className="postBottomLeft">
             <img
               className="likeIcon"
-              src={`${PF}like.png`}
-              onClick={likeHandler}
+              src="/assets/like.png"
               alt=""
             />
             <img
               className="likeIcon"
-              src={`${PF}heart.png`}
-              onClick={likeHandler}
+              src="/assets/heart.png"
               alt=""
             />
-            <span className="postLikeCounter">{like} people like it</span>
+            <span className="postLikeCounter">{post.stats.likes} people like it</span>
           </div>
           <div className="postBottomRight">
-            <span className="postCommentText">{post.comment} comments</span>
+            <span className="postCommentText">{post.stats.comments} comments</span>
           </div>
         </div>
       </div>

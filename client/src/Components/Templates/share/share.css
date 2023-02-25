@@ -65,7 +65,8 @@
 
 .shareButton{
     border: none;
-    padding: 7px;
+    height: 44px;
+    width: 131px;
     border-radius: 5px;
     background-color: green;
     font-weight: 500;
@@ -86,8 +87,8 @@
 
 .shareCancelImg{
   position: absolute;
-  top: 0;
-  right: 20px;
+  top: 5px;
+  right: 29px;
   cursor: pointer;
   opacity: 0.7;
 }

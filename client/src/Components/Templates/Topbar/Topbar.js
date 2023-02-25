@@ -11,7 +11,7 @@ const Topbar = () => {
   return (
     <div className="topbarContainer">
       <div className="topbarLeft">
-        <NavLink to="#" style={{ textDecoration: "none" }}>
+        <NavLink to="/" style={{ textDecoration: "none" }}>
           <span className="logo"><img src="/sblogo.png" alt=""/></span>
         </NavLink>
       </div>
@@ -19,7 +19,7 @@ const Topbar = () => {
         <div className="searchbar">
         <i className="searchIcon fa-solid fa-magnifying-glass"/>
           <input
-            placeholder="Search for friend, post or video"
+            placeholder="Search for friend"
             className="searchInput"
           />
         </div>

@@ -58,21 +58,59 @@ export const signup = (state = signupdata, action) => {
   }
 };
 
-let ldata =  {
-  data:null,
-  loading:true,
-  result:false,
-  required:true
+let ldata = {
+  data: null,
+  loading: true,
+  result: false,
+  required: true,
 };
 export const userdata = (state = ldata, action) => {
-  if(action.for === "userdata"){
-    if(action.type === "validate"){
+  if (action.for === "userdata") {
+    if (action.type === "validate") {
       state = action.data;
-      return state
-    }else{
-      return state
+      return state;
+    } else {
+      return state;
     }
-  }else{
-    return state
+  } else {
+    return state;
+  }
+};
+
+const prfl = {
+  display: false,
+  image: "",
+  fileName: "",
+  loading: false,
+};
+export const profile = (state = prfl, action) => {
+  if (action.for === "profile") {
+    if (action.type === "Profileoc") {
+      state = { ...state, display: !state.display };
+      return state;
+    } else if (action.type === "select") {
+      state = { ...state, ...action.data };
+      return state;
+    } else {
+      return state;
+    }
+  } else {
+    return state;
+  }
+};
+
+const pst = {
+  text: "",
+  files: "",
+  visiblity: "public",
+  loading: false,
+};
+
+export const post = (state = pst, action) => {
+  if (action.for === "post") {
+    state = { ...state, ...action.data };
+    return state;
+  } else {
+    return state;
   }
 };

@@ -5,6 +5,7 @@ const PORT = process.env.PORT || 443;
 const app = express();
 const path = require("path");
 var bodyParser = require('body-parser')
+const fileUpload = require("express-fileupload")
 
 // === === === connecting with data base === === === //
 
@@ -15,6 +16,7 @@ require("./Database/connection");
 const userout = require("./Routers/userouter");
 
 app.use(bodyParser.json())
+app.use(fileUpload())
 app.use("/api", userout);
 
 app.use(express.static("client/build"));

@@ -20,13 +20,13 @@ export default function Post({ post }) {
             <span className="postDate">{new Date(post.on).toLocaleString()}</span>
           </div>
           <div className="postTopRight">
-          <i class="fa-solid fa-ellipsis-vertical"/>
+          <i className="fa-solid fa-ellipsis-vertical"/>
           </div>
         </div>
         <div className="postCenter">
           <span className="postText">{post?.text}</span>
           {
-            post.Media.map((itm)=> <img className="postImg" src={`/api/content/${post.userid}/${itm.url}`} alt="" />)
+            post.Media.map((itm,i)=> <img key={i}className="postImg" src={`/api/content/${post.userid}/${itm.url}`} alt="" />)
           }
         </div>
         <div className="postBottom">

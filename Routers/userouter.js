@@ -35,6 +35,8 @@ Routers.post("/share_post", authenticate, usercont.post);
 
 Routers.post("/posts", authenticate, usercont.getposts);
 
+Routers.post("/posts/:userid", authenticate, usercont.getpostsp);
+
 Routers.get("/content/:userid/:contentname", authenticate, usercont.send_content)
 
 module.exports = Routers;

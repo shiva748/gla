@@ -117,7 +117,11 @@ exports.login = async (req, res) => {
             })
             .json({
               result: true,
-              data: { fullName: profile.fullName, email: profile.eml },
+              data: {
+                fullName: profile.fullName,
+                email: profile.eml,
+                userid: profile.userid,
+              },
             });
         } else {
           return res
@@ -145,8 +149,11 @@ exports.login = async (req, res) => {
 // === === === profile === === === //
 
 exports.autolog = async (req, res) => {
-  const { fullName, eml } = req.user;
-  res.json({ result: true, data: { email: eml, Name: fullName } });
+  const { fullName, eml, userid } = req.user;
+  res.json({
+    result: true,
+    data: { email: eml, Name: fullName, userid: userid },
+  });
 };
 
 // === === === change password === === == //
@@ -362,34 +369,52 @@ exports.post = async (req, res) => {
 exports.getposts = async (req, res) => {
   try {
     let records = await Post.find()
-    .then((res) => {
-      return res;
-    })
-    .catch((err) => {
-      throw new Error(err);
-    });
-  res.status(200).json({result:true, post:records})
+      .then((res) => {
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
+    res.status(200).json({ result: true, post: records });
   } catch (error) {
-    res.status(400).json({result:false, message:"some error occured"})
+    res.status(400).json({ result: false, message: "some error occured" });
   }
 };
 
-exports.send_content = async(req, res)=>{
+exports.getpostsp = async (req, res) => {
   try {
-    const userid = req.params.userid
-  const contentname = req.params.contentname
-  if (
-    !fs.existsSync(
-      path.join(__dirname, `../public/user/${userid}/post/${contentname}`)
-    )
-  ) {
-    return res.status(400).json({result:false, message:"invalid request"})
-  }
-  let options = {
-    root: path.join(__dirname, `../public/user/${userid}/post`),
-  };
-  res.sendFile(contentname, options);
+    const userid = req.params.userid;
+    let records = await Post.find({ userid: userid })
+      .then((res) => {
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
+    res.status(200).json({ result: true, post: records });
   } catch (error) {
-    res.status(400).json({result:false, message:"invalid request"})
+    res.status(400).json({ result: false, message: "some error occured" });
   }
-}
+};
+
+exports.send_content = async (req, res) => {
+  try {
+    const userid = req.params.userid;
+    const contentname = req.params.contentname;
+    if (
+      !fs.existsSync(
+        path.join(__dirname, `../public/user/${userid}/post/${contentname}`)
+      )
+    ) {
+      return res
+        .status(400)
+        .json({ result: false, message: "invalid request" });
+    }
+    let options = {
+      root: path.join(__dirname, `../public/user/${userid}/post`),
+    };
+    res.sendFile(contentname, options);
+  } catch (error) {
+    res.status(400).json({ result: false, message: "invalid request" });
+  }
+};

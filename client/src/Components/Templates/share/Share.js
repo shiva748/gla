@@ -70,7 +70,6 @@ export default function Share() {
           <div className="shareOptions">
             <label htmlFor="file" className="shareOption">
               <i
-                htmlColor="tomato"
                 className="shareIcon fa-solid fa-photo-film"
               />
               <span className="shareOptionText">Photo or Video</span>
@@ -85,7 +84,7 @@ export default function Share() {
               />
             </label>
             <label htmlFor="visiblity" className="shareOption">
-              <i class="fa-solid fa-eye" />
+              <i className="fa-solid fa-eye" />
               <span className="shareOptionText" style={{ margin: "0px 5px" }}>
                 Visiblity
               </span>

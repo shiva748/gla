@@ -3,8 +3,10 @@ import Post from "../post/Post";
 import Share from "../share/Share";
 import "./feed.css";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 export default function Feed(dataa) {
+  const user = useSelector((state) => state.userdata);
   const [posts, setPosts] = useState([]);
   const fetch_posts = async () => {
     const res = await fetch(dataa.userid?`/api/posts/${dataa.userid}`:`/api/posts`, {
@@ -24,7 +26,7 @@ export default function Feed(dataa) {
   return (
     <div className="feed">
       <div className="feedWrapper">
-        <Share />
+        {!dataa.userid?<Share/>:dataa.userid !== user.data.userid?"":<Share/>}
         {posts.map((p) => (
           <Post key={p._id} post={p} />
         ))}

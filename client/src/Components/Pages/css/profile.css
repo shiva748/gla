@@ -66,3 +66,22 @@ left: 0px;
 .profileRightBottom{
     display: flex;
 }
+
+.button{
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    background-color: #677eff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    position: absolute;
+    font-size: 25px;
+    bottom: 50px;
+    right: 20px;
+    transition: all .5s;
+}
+.button:hover{
+    transform: scale(1.2);
+}

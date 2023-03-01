@@ -2,14 +2,16 @@ import "./post.css";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function Post({ post }) {
+  const user = useSelector((state) => state.userdata);
   return (
     <div className="post">
       <div className="postWrapper">
         <div className="postTop">
           <div className="postTopLeft">
-            <Link to={`/profile/${post.userid}`}>
+            <Link to={user.data.userid !== post.userid?`/profile/${post.userid}`:"/profile"}>
               <img
                 className="postProfileImg"
                 src={`/api/profilepic/${post.userid}`}

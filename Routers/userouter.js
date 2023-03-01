@@ -27,9 +27,15 @@ Routers.post("/changepass", authenticate, usercont.change_pass);
 
 Routers.post("/profilepic", authenticate, usercont.profile_pic);
 
+Routers.post("/cover", authenticate, usercont.cover);
+
 Routers.get("/profilepic", authenticate, usercont.send_pp);
 
 Routers.get("/profilepic/:userid", usercont.send_po);
+
+Routers.get("/cover", authenticate, usercont.send_cp);
+
+Routers.get("/cover/:userid", usercont.send_co);
 
 Routers.post("/share_post", authenticate, usercont.post);
 

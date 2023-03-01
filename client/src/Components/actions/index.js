@@ -63,10 +63,31 @@ export const Profile_sele = (data)=>{
     data
   }
 }
+export const Cover_tog = ()=>{
+  return {
+    for:"cover",
+    type:"Coveroc"
+  }
+}
 
+export const Cover_sele = (data)=>{
+  return {
+    for:"cover",
+    type:"select",
+    data
+  }
+}
 export const post_edt = (data)=>{
   return {
     for:"post",
+    type:"edit",
+    data
+  }
+}
+
+export const ntftn_edt = (data)=>{
+  return {
+    for:"notification",
     type:"edit",
     data
   }

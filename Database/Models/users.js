@@ -3,10 +3,10 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const usr = new mongoose.Schema({
-  userid:{
-    type:String,
-    require:true,
-    unique:true,
+  userid: {
+    type: String,
+    require: true,
+    unique: true,
   },
   eml: {
     type: String,
@@ -53,6 +53,9 @@ const usr = new mongoose.Schema({
     type: String,
   },
   path: {
+    type: String,
+  },
+  cover: {
     type: String,
   },
 });

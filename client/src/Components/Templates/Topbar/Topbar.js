@@ -1,7 +1,12 @@
 import "./topbar.css";
 import { NavLink } from "react-router-dom";
+import Notification from "../notification/Notification"
+import { useSelector, useDispatch } from "react-redux";
+import { ntftn_edt } from "../../actions";
 
 const Topbar = () => {
+  const dispatch = useDispatch();
+  const notification = useSelector((state) => state.notification);
   const user = {
     id:1,
     profilePicture: "person/1.jpeg",
@@ -29,19 +34,12 @@ const Topbar = () => {
           <span className="topbarLink">Homepage</span>
           <span className="topbarLink">Timeline</span>
         </div>
-        <div className="topbarIcons">
+        <div className="topbarIcons" style={{position:"relative"}} >
           <div className="topbarIconItem">
-          <i className="fa-solid fa-person"/>
-            <span className="topbarIconBadge">1</span>
-          </div>
-          <div className="topbarIconItem">
-          <i className="fa-regular fa-message"/>
+          <i class="fa-solid fa-bell" onClick={()=>{dispatch(ntftn_edt({display:notification.display?false:true}))}} />
             <span className="topbarIconBadge">2</span>
           </div>
-          <div className="topbarIconItem">
-          <i className="fa-solid fa-comments"/>
-            <span className="topbarIconBadge">1</span>
-          </div>
+          {notification.display?<Notification/>:""}
         </div>
         <NavLink to="/profile">
           <img
@@ -52,6 +50,6 @@ const Topbar = () => {
         </NavLink>
       </div>
     </div>
-  );
-};
+  )
+}
 export default Topbar;

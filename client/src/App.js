@@ -6,8 +6,11 @@ import Home from "./Components/Pages/Home";
 import { useSelector } from "react-redux";
 import Loading from "./Components/Pages/Loading";
 import Profile from "./Components/Pages/Profile";
+import Oprofile from "./Components/Pages/Oprofile";
+
 const App = () => {
   const right = useSelector((state) => state.userdata);
+
   return (
     <BrowserRouter>
       {right.required ? (
@@ -21,6 +24,9 @@ const App = () => {
             </Route>
             <Route exact path="/profile">
               <Profile />
+            </Route>
+            <Route exact path="/profile/:userid">
+              <Oprofile/>
             </Route>
           </Switch>
           ) : (

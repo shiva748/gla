@@ -98,7 +98,27 @@ export const profile = (state = prfl, action) => {
     return state;
   }
 };
-
+const cvr = {
+  display: false,
+  image: "",
+  fileName: "",
+  loading: false,
+};
+export const cover = (state = cvr, action) => {
+  if (action.for === "cover") {
+    if (action.type === "Coveroc") {
+      state = { ...state, display: !state.display };
+      return state;
+    } else if (action.type === "select") {
+      state = { ...state, ...action.data };
+      return state;
+    } else {
+      return state;
+    }
+  } else {
+    return state;
+  }
+};
 const pst = {
   text: "",
   files: "",
@@ -114,3 +134,17 @@ export const post = (state = pst, action) => {
     return state;
   }
 };
+const ntftn = {
+  display:false,
+  freq:"",
+  ntftn:""
+}
+
+export const notification = (state = ntftn, action)=>{
+  if (action.for === "notification") {
+    state = { ...state, ...action.data };
+    return state;
+  } else {
+    return state;
+  }
+}

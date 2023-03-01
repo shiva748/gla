@@ -243,6 +243,48 @@ exports.profile_pic = async (req, res) => {
   }
 };
 
+exports.cover = async (req, res) => {
+  try {
+    const user = req.user;
+    const filename = req.files.cover.name;
+    const file = req.files.cover;
+    if (
+      !fs.existsSync(
+        path.join(__dirname, `../public/user/${user.userid}/cover/`)
+      )
+    ) {
+      if (
+        !fs.existsSync(path.join(__dirname, `../public/user/${user.userid}/`))
+      ) {
+        fs.mkdirSync(path.join(__dirname, `../public/user/${user.userid}/`));
+      }
+      fs.mkdirSync(
+        path.join(__dirname, `../public/user/${user.userid}/cover/`)
+      );
+    }
+    let name = (await randomstring.generate(15)) + "." + filename.split(".")[1];
+    let paths = __dirname + `/../public/user/${user.userid}/cover/` + name;
+
+    file.mv(paths, (err) => {
+      if (err) {
+        return res.send(err);
+      }
+    });
+    const update = await Usr.updateOne({ eml: user.eml }, { cover: name })
+      .then((res) => {
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
+    return res
+      .status(201)
+      .json({ result: true, message: "successfully uploaded" });
+  } catch (error) {
+    res.status(400).json({ result: false, message: "some error occured" });
+  }
+};
+
 exports.send_po = async (req, res) => {
   var id = req.params.userid;
   const user = await Usr.findOne(
@@ -283,6 +325,56 @@ exports.send_pp = async (req, res) => {
     !fileName ||
     !fs.existsSync(
       path.join(__dirname, `../public/user/${user.userid}/profile`, fileName)
+    )
+  ) {
+    options = {
+      root: path.join(__dirname, "../public/user/default/"),
+    };
+    fileName = "pic.png";
+  }
+  res.sendFile(fileName, options);
+};
+
+exports.send_co = async (req, res) => {
+  var id = req.params.userid;
+  const user = await Usr.findOne(
+    { userid: id },
+    { cover: 1, _id: 0, userid: 1 }
+  )
+    .then((res) => {
+      return res;
+    })
+    .catch((err) => {
+      throw new Error(err);
+    });
+  let options = {
+    root: path.join(__dirname, `../public/user/${user.userid}/cover`),
+  };
+  let fileName = user.cover;
+  if (
+    !fileName ||
+    !fs.existsSync(
+      path.join(__dirname, `../public/user/${user.userid}/cover`, fileName)
+    )
+  ) {
+    options = {
+      root: path.join(__dirname, "../public/user/default/"),
+    };
+    fileName = "pic.png";
+  }
+  res.sendFile(fileName, options);
+};
+
+exports.send_cp = async (req, res) => {
+  const user = req.user;
+  let options = {
+    root: path.join(__dirname, `../public/user/${user.userid}/cover`),
+  };
+  let fileName = user.cover;
+  if (
+    !fileName ||
+    !fs.existsSync(
+      path.join(__dirname, `../public/user/${user.userid}/cover`, fileName)
     )
   ) {
     options = {

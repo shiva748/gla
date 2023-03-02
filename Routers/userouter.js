@@ -43,6 +43,12 @@ Routers.post("/posts", authenticate, usercont.getposts);
 
 Routers.post("/posts/:userid", authenticate, usercont.getpostsp);
 
-Routers.get("/content/:userid/:contentname", authenticate, usercont.send_content)
+Routers.get(
+  "/content/:userid/:contentname",
+  authenticate,
+  usercont.send_content
+);
+
+Routers.post("/usr/frq", authenticate, usercont.send_frq);
 
 module.exports = Routers;

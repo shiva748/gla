@@ -9,7 +9,7 @@ var randomstring = require("randomstring");
 const { error } = require("console");
 const Post = require("../Database/Models/post");
 const uniqid = require("uniqid");
-
+const FRQ = require("../Database/Models/frq");
 // === === === home === === === //
 
 exports.home = async (req, res) => {
@@ -460,7 +460,13 @@ exports.post = async (req, res) => {
 
 exports.getposts = async (req, res) => {
   try {
-    let records = await Post.find()
+    let records = await Post.aggregate(
+      [
+         { 
+           $sample: { size: 20 } 
+         }
+      ]
+   )
       .then((res) => {
         return res;
       })
@@ -508,5 +514,48 @@ exports.send_content = async (req, res) => {
     res.sendFile(contentname, options);
   } catch (error) {
     res.status(400).json({ result: false, message: "invalid request" });
+  }
+};
+
+exports.send_frq = async (req, res) => {
+  try {
+    const user = req.user;
+    const { userid } = req.body;
+    const isuser = await Usr.findOne({
+      userid,
+    })
+      .then((res) => res)
+      .catch((err) => {
+        throw new Error(err);
+      });
+    if (isuser) {
+      const eve = new FRQ({
+        frqid: user.userid + "-" + userid,
+        from: {
+          userid: user.userid,
+          fullName: user.fullName,
+          visiblity: true,
+        },
+        to: {
+          userid: isuser.userid,
+          fullName: isuser.fullName,
+          visiblity: true,
+        },
+        on: new Date(),
+        status: "pending",
+      });
+      const ress = await eve.save();
+      res
+        .status(201)
+        .json({ result: true, message: "friend request sent successfully" });
+    } else {
+      throw new Error("Invalid Userid");
+    }
+  } catch (error) {
+    if(error.code === 11000){
+      return res.status(400).json({result:false, message:"friend request already sent"});
+    }else{
+    return res.status(400).json(error.message);
+    }
   }
 };

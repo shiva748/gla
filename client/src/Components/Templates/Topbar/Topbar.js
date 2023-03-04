@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import "./topbar.css";
-import { NavLink } from "react-router-dom";
 import Notification from "../notification/Notification";
 import { useSelector, useDispatch } from "react-redux";
 import { ntftn_edt, optn_edt } from "../../actions";
@@ -26,11 +25,9 @@ const Topbar = () => {
   return (
     <div className="topbarContainer">
       <div className="topbarLeft">
-        <NavLink to="/" style={{ textDecoration: "none" }}>
           <span className="logo">
             <img src="/sblogo.png" alt="" />
           </span>
-        </NavLink>
       </div>
       <div className="topbarCenter">
         <div className="searchbar">

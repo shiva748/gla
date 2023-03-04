@@ -28,6 +28,7 @@
     bottom: 100px;
     overflow: hidden;
     transition-property: all;
+    z-index: 2;
 }
 .prfl:hover .profile_upload::after{
 content: "Upload";

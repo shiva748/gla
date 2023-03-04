@@ -11,6 +11,7 @@ const authenticate = require("../Middleware/auth");
 // === === === cookie extractor === === === //
 
 const cookie = require("cookie-parser");
+const { Router } = require("express");
 Routers.use(cookie());
 
 // === ==== === routes === === === //
@@ -50,5 +51,11 @@ Routers.get(
 );
 
 Routers.post("/usr/frq", authenticate, usercont.send_frq);
+
+Routers.get("/usr/gtfrq", authenticate, usercont.lst_frq);
+
+Routers.get("/logout", authenticate, usercont.logout);
+
+Routers.post("/post/delete", authenticate, usercont.delete_post);
 
 module.exports = Routers;

@@ -1,15 +1,14 @@
 const Usr = require("../Database/Models/users");
 const validator = require("validator");
-const { MongooseError } = require("mongoose");
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
-const mime = require("mime");
 var randomstring = require("randomstring");
-const { error } = require("console");
 const Post = require("../Database/Models/post");
 const uniqid = require("uniqid");
 const FRQ = require("../Database/Models/frq");
+const OTP = require("../Database/Models/otp");
+const axios = require("axios");
 // === === === home === === === //
 
 exports.home = async (req, res) => {
@@ -118,7 +117,7 @@ exports.login = async (req, res) => {
             .json({
               result: true,
               data: {
-                fullName: profile.fullName,
+                Name: profile.fullName,
                 email: profile.eml,
                 userid: profile.userid,
               },
@@ -417,6 +416,7 @@ exports.post = async (req, res) => {
     }
     const data = JSON.parse(req.body.data);
     let obj = {
+      postid: uniqid("post-"),
       userid: user.userid,
       fullName: user.fullName,
       text: data.text,
@@ -449,9 +449,7 @@ exports.post = async (req, res) => {
       .catch((err) => {
         throw new Error(err);
       });
-    return res
-      .status(201)
-      .json({ result: true, message: "Posted successfully" });
+    return res.status(201).json({ result: true, post: obj });
   } catch (error) {
     console.log(error);
     res.status(400).json({ result: false, error: "some error occured" });
@@ -460,13 +458,11 @@ exports.post = async (req, res) => {
 
 exports.getposts = async (req, res) => {
   try {
-    let records = await Post.aggregate(
-      [
-         { 
-           $sample: { size: 20 } 
-         }
-      ]
-   )
+    let records = await Post.aggregate([
+      {
+        $sample: { size: 20 },
+      },
+    ])
       .then((res) => {
         return res;
       })
@@ -552,10 +548,61 @@ exports.send_frq = async (req, res) => {
       throw new Error("Invalid Userid");
     }
   } catch (error) {
-    if(error.code === 11000){
-      return res.status(400).json({result:false, message:"friend request already sent"});
-    }else{
-    return res.status(400).json(error.message);
+    if (error.code === 11000) {
+      return res
+        .status(400)
+        .json({ result: false, message: "friend request already sent" });
+    } else {
+      return res.status(400).json(error.message);
     }
+  }
+};
+exports.lst_frq = async (req, res) => {
+  try {
+    const user = req.user;
+    const Frq = await FRQ.find({ "to.userid": user.userid })
+      .then((res) => res)
+      .catch((err) => {
+        throw new Error(err);
+      });
+    res.status(200).json({ result: true, data: Frq });
+  } catch (error) {
+    res.status(400).json({ result: false, message: "some error occured" });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    const token = req.user.tokens;
+    const filtered = token.filter((itm) => {
+      return itm.token !== req.token;
+    });
+    const dt = await Usr.updateOne({ eml: req.user.eml }, { tokens: filtered })
+      .then((res) => {
+        return res;
+      })
+      .catch((error) => {
+        throw new Error(err);
+      });
+    res.clearCookie("ltk").json({ message: "logged out successfully" });
+  } catch (error) {
+    res.clearCookie("ltk").json({ message: "logged out successfully" });
+  }
+};
+
+exports.delete_post = async (req, res) => {
+  try {
+    const { postid } = req.body;
+    const user = req.user;
+    const resu = await Post.deleteOne({ userid: user.userid, postid })
+      .then((res) => res)
+      .catch((err) => {
+        throw new Error(err);
+      });
+    res
+      .status(200)
+      .json({ result: true, message: "post deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ result: false, message: "some error occured" });
   }
 };

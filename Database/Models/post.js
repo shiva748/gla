@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const post = new mongoose.Schema({
+  postid: { type: String, require: true, unique: true },
   userid: { type: String, require: true },
   fullName: { type: String, require: true },
   text: {

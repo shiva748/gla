@@ -8,12 +8,12 @@ const frq = new mongoose.Schema({
   },
   from: {
     userid: { type: String, require: true },
-    fullname: { type: String, require: true },
+    fullName: { type: String, require: true },
     visible: { type: Boolean, require: true },
   },
   to: {
     userid: { type: String, require: true },
-    fullname: { type: String, require: true },
+    fullName: { type: String, require: true },
     visible: { type: Boolean, require: true },
   },
   on: {

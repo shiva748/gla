@@ -38,7 +38,7 @@ const Profile = () => {
         <Sidebar />
         <div className="profileRight">
           <div className="profileRightTop">
-            <div className="profileCover">
+            <div className="profileCover ovrly-ad">
               <div
                 class="button"
                 onClick={() => {

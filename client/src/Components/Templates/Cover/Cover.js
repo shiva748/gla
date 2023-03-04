@@ -14,7 +14,7 @@ const Cover = () => {
       let formdata = new FormData();
       formdata.append("cover", cover.image);
       dispatch(Cover_sele({ loading: true }));
-      axios
+      await axios
         .post("/api/cover", formdata)
         .then((res) => {
           return res;
@@ -22,14 +22,7 @@ const Cover = () => {
         .catch((err) => {
           throw new Error(err);
         });
-      dispatch(
-        Cover_sele({
-          fileName: "",
-          image: "",
-          display: false,
-          loading: false,
-        })
-      );
+        window.location.reload()
     } catch (error) {
       console.log(error);
     }

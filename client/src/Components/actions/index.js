@@ -92,3 +92,19 @@ export const ntftn_edt = (data)=>{
     data
   }
 }
+
+export const optn_edt = (data)=>{
+  return {
+    for:"option",
+    type:"edit",
+    data
+  }
+}
+
+export const posts_edt = (data)=>{
+  return {
+    for:"posts",
+    type:"edit",
+    data
+  }
+}

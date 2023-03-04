@@ -15,7 +15,7 @@ const Profile = () => {
       let formdata = new FormData();
       formdata.append("profile", profile.image);
       dispatch(Profile_sele({ loading: true }));
-      axios
+      await axios
         .post("/api/profilepic", formdata)
         .then((res) => {
           return res;
@@ -23,6 +23,7 @@ const Profile = () => {
         .catch((err) => {
           throw new Error(err);
         });
+        window.location.reload()
       dispatch(
         Profile_sele({
           fileName: "",

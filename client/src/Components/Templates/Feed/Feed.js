@@ -1,13 +1,14 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Post from "../post/Post";
 import Share from "../share/Share";
 import "./feed.css";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import { posts_edt } from "../../actions";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function Feed(dataa) {
+  const dispatch = useDispatch()
   const user = useSelector((state) => state.userdata);
-  const [posts, setPosts] = useState([]);
+  const posts = useSelector((state) => state.posts);
   const fetch_posts = async () => {
     const res = await fetch(dataa.userid?`/api/posts/${dataa.userid}`:`/api/posts`, {
       method: "POST",
@@ -18,7 +19,7 @@ export default function Feed(dataa) {
       credentials: "include"
     });
     const data = await res.json();
-    setPosts(data.post);
+    dispatch(posts_edt({display:true, post:data.post}))
   };
   useEffect(() => {
     fetch_posts();
@@ -27,9 +28,9 @@ export default function Feed(dataa) {
     <div className="feed">
       <div className="feedWrapper">
         {!dataa.userid?<Share/>:dataa.userid !== user.data.userid?"":<Share/>}
-        {posts.map((p) => (
-          <Post key={p._id} post={p} />
-        ))}
+        {posts.display?posts.post.map((p,i) => (
+          <Post key={i} post={p} />
+        )):""}
       </div>
     </div>
   );

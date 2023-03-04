@@ -2,12 +2,13 @@ import "./share.css";
 import { useState } from "react";
 import axios from "axios";
 import FormData from "form-data";
-import { post_edt } from "../../actions";
+import { post_edt, posts_edt } from "../../actions";
 
 import { useSelector, useDispatch } from "react-redux";
 
 export default function Share() {
   const dispatch = useDispatch();
+  const posts = useSelector((state) => state.posts);
   const user = useSelector((state) => state.userdata);
   const post = useSelector((state) => state.post);
   const [file, setFile] = useState(null);
@@ -19,8 +20,8 @@ export default function Share() {
       let formData = new FormData();
       formData.append("file", post.files);
       formData.append("data", JSON.stringify({ ...post, files: "" }));
-      dispatch(post_edt({loading:true}))
-      await axios
+      dispatch(post_edt({ loading: true }));
+      const resu = await axios
         .post("/api/share_post", formData)
         .then((res) => {
           return res;
@@ -28,9 +29,12 @@ export default function Share() {
         .catch((err) => {
           throw new Error(err);
         });
+      const edt = posts.post;
+      edt.splice(0, 0, resu.data.post);
       dispatch(
         post_edt({ text: "", files: "", visiblity: "public", loading: false })
       );
+      dispatch(posts_edt({ post: edt }));
     } catch (error) {
       console.log(error);
     }
@@ -69,9 +73,7 @@ export default function Share() {
         <form className="shareBottom" onSubmit={submitHandler}>
           <div className="shareOptions">
             <label htmlFor="file" className="shareOption">
-              <i
-                className="shareIcon fa-solid fa-photo-film"
-              />
+              <i className="shareIcon fa-solid fa-photo-film" />
               <span className="shareOptionText">Photo or Video</span>
               <input
                 style={{ display: "none" }}
@@ -101,7 +103,7 @@ export default function Share() {
           </div>
           <button className="shareButton" type="submit">
             {post.loading ? (
-              <img src="/load.svg" alt="" className="ldn_img"  />
+              <img src="/load.svg" alt="" className="ldn_img" />
             ) : (
               "Share"
             )}

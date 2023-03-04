@@ -1,12 +1,22 @@
+import { useEffect } from "react";
 import "./topbar.css";
 import { NavLink } from "react-router-dom";
 import Notification from "../notification/Notification";
 import { useSelector, useDispatch } from "react-redux";
-import { ntftn_edt } from "../../actions";
-
+import { ntftn_edt, optn_edt } from "../../actions";
+import axios from "axios";
+import Option from "../Options/Options";
 const Topbar = () => {
   const dispatch = useDispatch();
+  const getfrq = async () => {
+    const frq = await axios.get("/api/usr/gtfrq");
+    dispatch(ntftn_edt({ freq: frq.data.data }));
+  };
+  useEffect(() => {
+    getfrq();
+  }, []);
   const notification = useSelector((state) => state.notification);
+  const Opt = useSelector((state) => state.Option);
   const user = {
     id: 1,
     profilePicture: "person/1.jpeg",
@@ -44,14 +54,25 @@ const Topbar = () => {
           >
             <div className="topbarIconItem">
               <i class="fa-solid fa-bell ovrly" />
-              <span className="topbarIconBadge">2</span>
+              {notification.freq.length > 0 ? (
+                <span className="topbarIconBadge">
+                  {notification.freq.length}
+                </span>
+              ) : (
+                ""
+              )}
             </div>
           </div>
           {notification.display ? <Notification /> : ""}
         </div>
-        <NavLink to="/profile">
+        <a
+          onClick={() => {
+            dispatch(optn_edt({ display: !Opt.display }));
+          }}
+        >
           <img src="/api/profilepic" alt="" className="topbarImg" />
-        </NavLink>
+        </a>
+        {Opt.display ? <Option /> : ""}
       </div>
     </div>
   );

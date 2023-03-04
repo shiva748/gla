@@ -135,16 +135,43 @@ export const post = (state = pst, action) => {
   }
 };
 const ntftn = {
-  display:false,
-  freq:"",
-  ntftn:""
-}
+  display: false,
+  freq: [],
+  ntftn: "",
+};
 
-export const notification = (state = ntftn, action)=>{
+export const notification = (state = ntftn, action) => {
   if (action.for === "notification") {
     state = { ...state, ...action.data };
     return state;
   } else {
     return state;
   }
+};
+
+const optn = {
+  display:false
 }
+
+export const Option = (state = ntftn, action) => {
+  if (action.for === "option") {
+    state = { ...state, ...action.data };
+    return state;
+  } else {
+    return state;
+  }
+};
+
+const postc = {
+  display:false,
+  post:[]
+}
+
+export const posts = (state = postc, action) => {
+  if (action.for === "posts") {
+    state = {...state, ...action.data};
+    return state;
+  } else {
+    return state;
+  }
+};

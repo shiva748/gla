@@ -40,12 +40,12 @@ const Profile = () => {
           <div className="profileRightTop">
             <div className="profileCover ovrly-ad">
               <div
-                class="button"
+                className="button"
                 onClick={() => {
                   dispatch(Cover_tog());
                 }}
               >
-                <i class="fa-solid fa-pen-to-square" />
+                <i className="fa-solid fa-pen-to-square" />
               </div>
               <img className="profileCoverImg" src="/api/cover" alt="" />
               <div className="prfl">

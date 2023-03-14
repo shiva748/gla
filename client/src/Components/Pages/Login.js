@@ -1,16 +1,15 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import "./css/login.css";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  signup_ope,
-  signup_clo,
+  signup_tog,
   hdl_lgn_data,
   hdl_sgn_data,
   clean_sgn,
-  fll_lgn,
+  sgn_edt,
   clean_lgn,
   process_tog,
-  validate
+  validate,
 } from "../actions/index";
 const validator = require("validator");
 
@@ -35,10 +34,15 @@ const Login = () => {
     });
     let res = await response.json();
     if (response.status === 200) {
-      alert("successfully logged in");
-      dispatch(process_tog("login"));
-      dispatch(clean_lgn());
-      dispatch(validate(res))
+      if (res.vrftn_req) {
+        dispatch(process_tog("login"));
+        dispatch(signup_tog({ display: "otp" }));
+        dispatch(sgn_edt({ email }));
+      } else {
+        dispatch(process_tog("login"));
+        dispatch(clean_lgn());
+        dispatch(validate(res));
+      }
     }
   };
 
@@ -64,16 +68,40 @@ const Login = () => {
     if (response.status === 201) {
       alert(res.message);
       dispatch(process_tog("signup"));
-      dispatch(signup_clo());
-      dispatch(fll_lgn({ email, password }));
-      dispatch(clean_sgn());
+      dispatch(signup_tog({ display: "otp" }));
     }
   };
-  
+
+  const verify_otp = async (e) => {
+    e.preventDefault();
+    const { email, otp } = signupdata;
+    if (!validator.isEmail(email)) {
+      return alert("Please enter a valide email");
+    }
+    const response = await fetch("/api/register/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp }),
+    });
+    let res = await response.json();
+    console.log(res);
+    if (response.status === 200) {
+      dispatch(signup_tog({ display: "login" }));
+      dispatch(clean_sgn());
+      alert(res.message);
+      dispatch(validate(res));
+    }
+  };
   return (
     <>
       <section>
-        <div className={right ? "container active" : "container"}>
+        <div
+          className={
+            right.display == "singup" || right.display == "otp"
+              ? "container active"
+              : "container"
+          }
+        >
           <div className="user signinBx">
             <div className="imgBx">
               <img src="/logo.png" alt="" />
@@ -109,7 +137,7 @@ const Login = () => {
                   <a
                     href="#"
                     onClick={() => {
-                      dispatch(signup_ope());
+                      dispatch(signup_tog({ display: "singup" }));
                     }}
                   >
                     Sign Up.
@@ -120,61 +148,94 @@ const Login = () => {
           </div>
           <div className="user signupBx">
             <div className="formBx">
-              <form action="" onSubmit="return false;">
-                <h2>Create an account</h2>
+              {right.display == "otp" ? (
+                <form action="" onSubmit="return false;">
+                  <h2>Verification</h2>
+                  <input
+                    type="password"
+                    placeholder="Enter Otp"
+                    name="otp"
+                    onChange={(e) => dispatch(hdl_sgn_data(e))}
+                    value={signupdata.otp}
+                  />
+                  <button onClick={verify_otp} className="btn">
+                    <span>
+                      {signupdata.oprcs ? (
+                        <img src="/load.svg" alt="" className="ldn_img" />
+                      ) : (
+                        "Verify"
+                      )}
+                    </span>
+                  </button>
+                  <p className="signup">
+                    Already have an account ?
+                    <a
+                      href="#"
+                      onClick={() => {
+                        dispatch(signup_tog({ display: "login" }));
+                      }}
+                    >
+                      Sign in.
+                    </a>
+                  </p>
+                </form>
+              ) : (
+                <form action="" onSubmit="return false;">
+                  <h2>Create an account</h2>
 
-                <input
-                  type="text"
-                  placeholder="Name"
-                  name="fullName"
-                  onChange={(e) => dispatch(hdl_sgn_data(e))}
-                  value={signupdata.fullName}
-                />
+                  <input
+                    type="text"
+                    placeholder="Name"
+                    name="fullName"
+                    onChange={(e) => dispatch(hdl_sgn_data(e))}
+                    value={signupdata.fullName}
+                  />
 
-                <input
-                  type="email"
-                  placeholder="Email"
-                  name="email"
-                  onChange={(e) => dispatch(hdl_sgn_data(e))}
-                  value={signupdata.email}
-                />
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    name="email"
+                    onChange={(e) => dispatch(hdl_sgn_data(e))}
+                    value={signupdata.email}
+                  />
 
-                <input
-                  type="password"
-                  placeholder="Password"
-                  name="password"
-                  onChange={(e) => dispatch(hdl_sgn_data(e))}
-                  value={signupdata.password}
-                />
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    name="password"
+                    onChange={(e) => dispatch(hdl_sgn_data(e))}
+                    value={signupdata.password}
+                  />
 
-                <input
-                  type="password"
-                  placeholder="Confirm Password"
-                  name="confirmpass"
-                  onChange={(e) => dispatch(hdl_sgn_data(e))}
-                  value={signupdata.confirmpass}
-                />
-                <button onClick={signUp} className="btn">
-                  <span>
-                    {signupdata.process ? (
-                      <img src="/load.svg" alt="" className="ldn_img" />
-                    ) : (
-                      "Sign Up"
-                    )}
-                  </span>
-                </button>
-                <p className="signup">
-                  Already have an account ?
-                  <a
-                    href="#"
-                    onClick={() => {
-                      dispatch(signup_clo());
-                    }}
-                  >
-                    Sign in.
-                  </a>
-                </p>
-              </form>
+                  <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    name="confirmpass"
+                    onChange={(e) => dispatch(hdl_sgn_data(e))}
+                    value={signupdata.confirmpass}
+                  />
+                  <button onClick={signUp} className="btn">
+                    <span>
+                      {signupdata.process ? (
+                        <img src="/load.svg" alt="" className="ldn_img" />
+                      ) : (
+                        "Sign Up"
+                      )}
+                    </span>
+                  </button>
+                  <p className="signup">
+                    Already have an account ?
+                    <a
+                      href="#"
+                      onClick={() => {
+                        dispatch(signup_tog({ display: "login" }));
+                      }}
+                    >
+                      Sign in.
+                    </a>
+                  </p>
+                </form>
+              )}
             </div>
             <div className="imgBx">
               <img src="/logo.png" alt="" />

@@ -22,6 +22,8 @@ Routers.post("/login", usercont.login);
 
 Routers.post("/register", usercont.user_singup);
 
+Routers.post("/register/verify", usercont.verify_profile);
+
 Routers.get("/checkls", authenticate, usercont.autolog);
 
 Routers.post("/changepass", authenticate, usercont.change_pass);
@@ -57,5 +59,17 @@ Routers.get("/usr/gtfrq", authenticate, usercont.lst_frq);
 Routers.get("/logout", authenticate, usercont.logout);
 
 Routers.post("/post/delete", authenticate, usercont.delete_post);
+
+Routers.post("/post/like", authenticate, usercont.like_post);
+
+Routers.post("/share/event", authenticate, usercont.crt_eve);
+
+Routers.get("/event", authenticate, usercont.get_event);
+
+Routers.get(
+  "/event/content/:url",
+  authenticate,
+  usercont.send_evec
+);
 
 module.exports = Routers;

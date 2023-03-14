@@ -26,11 +26,11 @@ const Oprofile = () => {
           <div className="profileRightTop">
             <div className="profileCover">
               <div
-                class="button my-anchor-element"
+                className="button my-anchor-element"
                 style={{ backgroundColor: "lightgreen" }}
               >
                 <i
-                  class="fa-sharp fa-solid fa-plus"
+                  className="fa-sharp fa-solid fa-plus"
                   onClick={() => {
                     const postData = {
                       userid,

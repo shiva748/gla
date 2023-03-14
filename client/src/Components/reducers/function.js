@@ -1,15 +1,8 @@
-import { useEffect } from "react";
-const open = false;
+const open = { display: "login" };
 export const toggle_singup = (state = open, action) => {
   if (action.for === "toggle_singup") {
-    switch (action.type) {
-      case "open":
-        return (state = true);
-      case "close":
-        return (state = false);
-      default:
-        return state;
-    }
+    state = { ...state, ...action.data };
+    return state;
   } else {
     return state;
   }
@@ -38,14 +31,36 @@ export const login = (state = logindata, action) => {
   }
 };
 
-const signupdata = { fullName: "", email: "", password: "", confirmpass: "" };
+const signupdata = {
+  fullName: "",
+  email: "",
+  password: "",
+  confirmpass: "",
+  otp: "",
+  process: false,
+  oprcs: false,
+};
 export const signup = (state = signupdata, action) => {
   if (action.for === "signup") {
     if (action.type === "clean") {
-      state = { fullName: "", email: "", password: "", confirmpass: "" };
+      state = {
+        fullName: "",
+        email: "",
+        password: "",
+        confirmpass: "",
+        otp: "",
+        process: false,
+        oprcs: false,
+      };
       return state;
     } else if (action.type === "process") {
       state = { ...state, process: !state.process };
+      return state;
+    } else if (action.type === "oprcs") {
+      state = { ...state, oprcs: !state.oprcs };
+      return state;
+    } else if (action.type === "edit_1") {
+      state = { ...state, ...action.data };
       return state;
     } else {
       const name = action.event.target.name;
@@ -150,8 +165,8 @@ export const notification = (state = ntftn, action) => {
 };
 
 const optn = {
-  display:false
-}
+  display: false,
+};
 
 export const Option = (state = ntftn, action) => {
   if (action.for === "option") {
@@ -163,13 +178,52 @@ export const Option = (state = ntftn, action) => {
 };
 
 const postc = {
-  display:false,
-  post:[]
-}
+  display: false,
+  post: [],
+};
 
 export const posts = (state = postc, action) => {
   if (action.for === "posts") {
-    state = {...state, ...action.data};
+    state = { ...state, ...action.data };
+    return state;
+  } else {
+    return state;
+  }
+};
+
+const event = {
+  text: "",
+  image: "",
+  date_time: "",
+  location: "",
+  type: "gathering",
+  registration: false,
+  lnk: "",
+};
+export const Event = (state = event, action) => {
+  if (action.for === "event") {
+    if (action.type === "edt") {
+      const name = action.event.target.name;
+      const value = action.event.target.value;
+      state = { ...state, [name]: value };
+      return state;
+    } else {
+      state = { ...state, ...action.data };
+      return state;
+    }
+  } else {
+    return state;
+  }
+};
+
+const eventc = {
+  display: false,
+  event: [],
+};
+
+export const Events = (state = eventc, action) => {
+  if (action.for === "events") {
+    state = { ...state, ...action.data };
     return state;
   } else {
     return state;

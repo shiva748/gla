@@ -10,6 +10,7 @@ export default function Post({ post }) {
   const [optn, setoptn] = useState({ display: false });
   const user = useSelector((state) => state.userdata);
   const posts = useSelector((state) => state.posts);
+  const [sta, setsta] = useState(true);
   return (
     <div className="post">
       <div className="postWrapper">
@@ -33,41 +34,45 @@ export default function Post({ post }) {
               {new Date(post.on).toLocaleString()}
             </span>
           </div>
-          <div className="postTopRight" style={{ position: "relative" }}>
-            <i
-              className="fa-solid fa-ellipsis-vertical"
-              onClick={() => {
-                setoptn({ display: !optn.display });
-              }}
-            />
-            {optn.display ? (
-              <>
-                <div className="arr_popt"></div>
-                <div className="Popn_tab">
-                  <div
-                    onClick={async () => {
-                      try {
-                        await axios.post("/api/post/delete", {
-                          postid: post.postid,
-                        });
-                        let edt = posts.post.filter(
-                          (itm) => post.postid !== itm.postid
-                        );
-                        dispatch(posts_edt({ post: edt }));
-                      } catch (error) {}
-                    }}
-                    className="Popn_dt ovrly-ad"
-                    style={{ margin: "4px 0px" }}
-                  >
-                    <i class="fa-sharp fa-solid fa-trash" />
-                    <p className="Popn_txt">Delete</p>
+          {post.userid === user.data.userid ? (
+            <div className="postTopRight" style={{ position: "relative" }}>
+              <i
+                className="fa-solid fa-ellipsis-vertical"
+                onClick={() => {
+                  setoptn({ display: !optn.display });
+                }}
+              />
+              {optn.display ? (
+                <>
+                  <div className="arr_popt"></div>
+                  <div className="Popn_tab">
+                    <div
+                      onClick={async () => {
+                        try {
+                          await axios.post("/api/post/delete", {
+                            postid: post.postid,
+                          });
+                          let edt = posts.post.filter(
+                            (itm) => post.postid !== itm.postid
+                          );
+                          dispatch(posts_edt({ post: edt }));
+                        } catch (error) {}
+                      }}
+                      className="Popn_dt ovrly-ad"
+                      style={{ margin: "4px 0px" }}
+                    >
+                      <i className="fa-sharp fa-solid fa-trash" />
+                      <p className="Popn_txt">Delete</p>
+                    </div>
                   </div>
-                </div>
-              </>
-            ) : (
-              ""
-            )}
-          </div>
+                </>
+              ) : (
+                ""
+              )}
+            </div>
+          ) : (
+            ""
+          )}
         </div>
         <div className="postCenter ovrly-ad">
           <span className="postText">{post?.text}</span>
@@ -83,9 +88,41 @@ export default function Post({ post }) {
             : ""}
         </div>
         <div className="postBottom">
-          <div className="postBottomLeft">
+          <div
+            className="postBottomLeft"
+            onClick={async () => {
+              if (sta) {
+                setsta(false);
+                let [edt] = posts.post.filter(
+                  (itm) => post.postid === itm.postid
+                );
+                if (!edt.likes.some((itm) => itm.userid === user.data.userid)) {
+                  edt.stats.likes = edt.stats.likes + 1;
+                  edt.likes.push({ userid: user.data.userid });
+                  let pst = posts.post.filter(
+                    (itm) => post.postid !== itm.postid
+                  );
+                  pst.push(edt);
+                  dispatch(posts_edt({ post: pst }));
+                } else {
+                  edt.stats.likes = edt.stats.likes - 1;
+                  edt.likes = edt.likes.filter(
+                    (itm) => itm.userid === user.userid
+                  );
+                  let pst = posts.post.filter(
+                    (itm) => post.postid !== itm.postid
+                  );
+                  pst.push(edt);
+                  dispatch(posts_edt({ post: pst }));
+                }
+                const res = await axios.post("/api/post/like", {
+                  postid: post.postid,
+                });
+                setsta(true);
+              }
+            }}
+          >
             <img className="likeIcon" src="/assets/like.png" alt="" />
-            <img className="likeIcon" src="/assets/heart.png" alt="" />
             <span className="postLikeCounter">
               {post.stats.likes} people like it
             </span>

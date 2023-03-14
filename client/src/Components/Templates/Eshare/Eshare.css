@@ -1,0 +1,21 @@
+.inpt-row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 15px;
+}
+.ev-inpt{
+    height: 29px;
+    width: 240px;
+}
+.flex{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+.cancel{
+    background-color: red;
+}

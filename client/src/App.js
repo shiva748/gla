@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import Loading from "./Components/Pages/Loading";
 import Profile from "./Components/Pages/Profile";
 import Oprofile from "./Components/Pages/Oprofile";
+import Events from "./Components/Pages/Events";
 
 const App = () => {
   const right = useSelector((state) => state.userdata);
@@ -19,22 +20,25 @@ const App = () => {
         <>
           {right.result ? (
             <Switch>
-            <Route exact path="/">
-              <Home />
-            </Route>
-            <Route exact path="/profile">
-              <Profile />
-            </Route>
-            <Route exact path="/profile/:userid">
-              <Oprofile/>
-            </Route>
-          </Switch>
+              <Route exact path="/">
+                <Home />
+              </Route>
+              <Route exact path="/profile">
+                <Profile />
+              </Route>
+              <Route exact path="/profile/:userid">
+                <Oprofile />
+              </Route>
+              <Route exact path="/events">
+                <Events />
+              </Route>
+            </Switch>
           ) : (
             <Switch>
               <Route exact path="/">
                 <Login />
               </Route>
-            </Switch>  
+            </Switch>
           )}
         </>
       )}

@@ -50,7 +50,7 @@ const Topbar = () => {
             }}
           >
             <div className="topbarIconItem">
-              <i class="fa-solid fa-bell ovrly" />
+              <i className="fa-solid fa-bell ovrly" />
               {notification.freq.length > 0 ? (
                 <span className="topbarIconBadge">
                   {notification.freq.length}

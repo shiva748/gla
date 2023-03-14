@@ -9,6 +9,9 @@ const uniqid = require("uniqid");
 const FRQ = require("../Database/Models/frq");
 const OTP = require("../Database/Models/otp");
 const axios = require("axios");
+const Event = require("../Database/Models/eve");
+const { isDate } = require("util/types");
+const { default: isURL } = require("validator/lib/isURL");
 // === === === home === === === //
 
 exports.home = async (req, res) => {
@@ -41,11 +44,92 @@ exports.user_singup = async (req, res) => {
       fullName,
       eml: email,
       password,
+      verified: false,
     });
-    const result = await user.save();
+    const result = await user
+      .save()
+      .then((res) => {
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
+    // === === === sending otp === === === //
+    function generateOTP() {
+      var digits = "0123456789";
+      let OTP = "";
+      for (let i = 0; i < 6; i++) {
+        OTP += digits[Math.floor(Math.random() * 10)];
+      }
+      return OTP;
+    }
+    const otp = generateOTP();
+    const date = new Date().getTime();
+    const otpreq = new OTP({
+      eml: email,
+      code: otp,
+      expiry: date + 300 * 1000,
+      type: "registration",
+      createdon: date,
+      resend: {
+        on: date,
+        count: 0,
+      },
+      attempt: 1,
+    });
+    const sresult = await otpreq
+      .save()
+      .then((res) => {
+        return res;
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+    let data = {
+      to: [
+        {
+          name: fullName,
+          email: email,
+        },
+      ],
+      from: {
+        name: "Proconnect",
+        email: "info@z29bm8.mailer91.com",
+      },
+      domain: "z29bm8.mailer91.com",
+      mail_type_id: "1",
+      reply_to: [
+        {
+          email: "shivagautam2002@gmail.com",
+        },
+      ],
+      template_id: "Eml_verification",
+      variables: {
+        NAME: fullName,
+        COMN: "Proconnect",
+        OTP: `${otp}`,
+        WEB: "www.proconnect.com",
+        WMAIL: "Info@proconnect.com",
+      },
+    };
+    const customConfig = {
+      headers: {
+        "Content-Type": "application/JSON",
+        Accept: "application/json",
+        authkey: process.env.MSG91,
+      },
+    };
+    const emailreq = axios
+      .post("https://api.msg91.com/api/v5/email/send", data, customConfig)
+      .then((res) => {
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
     return res
       .status(201)
-      .json({ result: true, message: "You have been registered successfully" });
+      .json({ result: true, message: "an otp has been sent to your email" });
   } catch (err) {
     if (err.name === "TypeError") {
       return res
@@ -57,9 +141,7 @@ exports.user_singup = async (req, res) => {
         const cop =
           dat === "eml"
             ? "Email already registered"
-            : dat === "mbno"
-            ? "Phone No already in use"
-            : "University roll Number already registerd with another profile";
+            : "Phone No already in use";
         return res.status(409).json({ result: false, error: cop });
       }
     } else if (err.name === "ValidationError") {
@@ -68,9 +150,81 @@ exports.user_singup = async (req, res) => {
         : "Invalid Profile Type";
       return res.status(400).json({ result: false, error: cop });
     } else {
-      console.log(err);
-      return res.status(500).json({ result: false, error: "some error" });
+      return res
+        .status(500)
+        .json({ result: false, error: "some error occured" });
     }
+  }
+};
+
+// === === === verify profile === === === //
+
+exports.verify_profile = async (req, res) => {
+  try {
+    let { otp, email } = req.body;
+    let regex = new RegExp(["^", email, "$"].join(""), "i");
+    const isotp = await OTP.findOne({ eml: email, type: "registration" })
+      .then((res) => {
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
+    if (isotp.code !== otp) {
+      return res.status(400).json({ result: false, message: "Invalid otp" });
+    } else if (isotp.expiry < new Date().getTime()) {
+      return res.status(400).json({ result: false, message: "Otp expired" });
+    } else {
+      const update = await Usr.updateOne({ eml: regex }, { verified: true })
+        .then((res) => {
+          return res;
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+
+      const profile = await Usr.findOne({ eml: regex })
+        .then((data) => {
+          return data;
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+      const token = await profile
+        .genrateAuth(profile)
+        .then((data) => {
+          return data;
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+      if (token) {
+        res
+          .status(200)
+          .cookie("ltk", token, {
+            expires: new Date(Date.now() + 432000000),
+            httpOnly: true,
+          })
+          .json({
+            result: true,
+            data: {
+              Name: profile.fullName,
+              email: profile.eml,
+              userid: profile.userid,
+            },
+            message: "Profile Verification was successfull",
+          });
+      } else {
+        res.status(500).json({ result: false, error: "failed to fetch data" });
+      }
+      const dotp = OTP.deleteMany({ eml: email, type: "registration" })
+        .then((res) => {
+          return res;
+        })
+        .catch((err) => {});
+    }
+  } catch (error) {
+    res.status(400).json({ result: false, message: "some error occured" });
   }
 };
 
@@ -99,48 +253,141 @@ exports.login = async (req, res) => {
     if (profile) {
       const comparison = await bcrypt.compare(password, profile.password);
       if (comparison) {
-        const token = await profile
-          .genrateAuth(profile)
-          .then((data) => {
-            return data;
+        if (!profile.verified) {
+          const dotp = await OTP.deleteMany({
+            eml: profile.eml,
+            type: "registration",
           })
-          .catch((err) => {
-            return false;
-          });
-        if (token) {
-          return res
-            .status(200)
-            .cookie("ltk", token, {
-              expires: new Date(Date.now() + 432000000),
-              httpOnly: true,
+            .then((res) => {
+              return res;
             })
-            .json({
-              result: true,
-              data: {
-                Name: profile.fullName,
-                email: profile.eml,
-                userid: profile.userid,
-              },
+            .catch((err) => {
+              throw new Error(err);
             });
+          function generateOTP() {
+            var digits = "0123456789";
+            let OTP = "";
+            for (let i = 0; i < 6; i++) {
+              OTP += digits[Math.floor(Math.random() * 10)];
+            }
+            return OTP;
+          }
+          const otp = generateOTP();
+          const date = new Date().getTime();
+          const otpreq = new OTP({
+            eml: profile.eml,
+            code: otp,
+            expiry: date + 300 * 1000,
+            type: "registration",
+            createdon: date,
+            resend: {
+              on: date,
+              count: 0,
+            },
+            attempt: 1,
+          });
+          const sresult = await otpreq
+            .save()
+            .then((res) => {
+              return res;
+            })
+            .catch((error) => {
+              throw new Error(error);
+            });
+          let data = {
+            to: [
+              {
+                name: profile.fullName,
+                email: profile.eml,
+              },
+            ],
+            from: {
+              name: "Proconnect",
+              email: "info@z29bm8.mailer91.com",
+            },
+            domain: "z29bm8.mailer91.com",
+            mail_type_id: "1",
+            reply_to: [
+              {
+                email: "shivagautam2002@gmail.com",
+              },
+            ],
+            template_id: "Eml_verification",
+            variables: {
+              NAME: profile.fullName,
+              COMN: "Proconnect",
+              OTP: `${otp}`,
+              WEB: "www.proconnect.com",
+              WMAIL: "Info@proconnect.com",
+            },
+          };
+          const customConfig = {
+            headers: {
+              "Content-Type": "application/JSON",
+              Accept: "application/json",
+              authkey: process.env.MSG91,
+            },
+          };
+          const emailreq = await axios
+            .post("https://api.msg91.com/api/v5/email/send", data, customConfig)
+            .then((res) => {
+              return res;
+            })
+            .catch((err) => {
+              throw new Error(err);
+            });
+          return res.status(200).json({
+            result: true,
+            message: "an otp has been sent to your email",
+            vrftn_req: true,
+          });
         } else {
-          return res
-            .status(500)
-            .json({ result: false, error: "failed to fetch data" });
+          const token = await profile
+            .genrateAuth(profile)
+            .then((data) => {
+              return data;
+            })
+            .catch((err) => {
+              throw new Error(err);
+            });
+          if (token) {
+            return res
+              .status(200)
+              .cookie("ltk", token, {
+                expires: new Date(Date.now() + 432000000),
+                httpOnly: true,
+              })
+              .json({
+                result: true,
+                message: "login successfully",
+                vrftn_req: false,
+                data: {
+                  Name: profile.fullName,
+                  email: profile.eml,
+                  userid: profile.userid,
+                },
+              });
+          } else {
+            return res
+              .status(500)
+              .json({ result: false, message: "failed to fetch data" });
+          }
         }
       }
     } else {
-      return res
-        .status(400)
-        .json({ result: false, error: "Please check your email and password" });
+      return res.status(400).json({
+        result: false,
+        message: "Please check your email and password",
+      });
     }
   } catch (err) {
     if (err.name === "TypeError") {
-      console.log(err);
-      return res
-        .status(400)
-        .json({ result: false, error: "Please fill all the required field's" });
+      return res.status(400).json({
+        result: false,
+        message: "Please fill all the required field's",
+      });
     } else {
-      res.status(500).json({ result: false, error: "Some error occcured" });
+      res.status(500).json({ result: false, message: "Some error occcured" });
     }
   }
 };
@@ -191,7 +438,10 @@ exports.change_pass = async (req, res) => {
           "password updated successfully you are logged out from every device",
       });
     } else {
-      throw new Error("the password you have entered was incorrect");
+      throw new Error({
+        status: 400,
+        message: "the password you have entered was incorrect",
+      });
     }
   } catch (error) {
     res
@@ -218,6 +468,13 @@ exports.profile_pic = async (req, res) => {
       fs.mkdirSync(
         path.join(__dirname, `../public/user/${user.userid}/profile/`)
       );
+    }
+    if (
+      !["jpg", "jpeg", "png", "gif", "webp", "svg"].some(
+        (itm) => itm == filename.split(".")[1].toLowerCase()
+      )
+    ) {
+      return res.status(400).json({ result: false, message: "invalid image" });
     }
     let name = (await randomstring.generate(15)) + "." + filename.split(".")[1];
     let paths = __dirname + `/../public/user/${user.userid}/profile/` + name;
@@ -261,6 +518,13 @@ exports.cover = async (req, res) => {
         path.join(__dirname, `../public/user/${user.userid}/cover/`)
       );
     }
+    if (
+      !["jpg", "jpeg", "png", "gif", "webp", "svg"].some(
+        (itm) => itm == filename.split(".")[1].toLowerCase()
+      )
+    ) {
+      return res.status(400).json({ result: false, message: "invalid image" });
+    }
     let name = (await randomstring.generate(15)) + "." + filename.split(".")[1];
     let paths = __dirname + `/../public/user/${user.userid}/cover/` + name;
 
@@ -285,103 +549,119 @@ exports.cover = async (req, res) => {
 };
 
 exports.send_po = async (req, res) => {
-  var id = req.params.userid;
-  const user = await Usr.findOne(
-    { userid: id },
-    { profile: 1, _id: 0, userid: 1 }
-  )
-    .then((res) => {
-      return res;
-    })
-    .catch((err) => {
-      throw new Error(err);
-    });
-  let options = {
-    root: path.join(__dirname, `../public/user/${user.userid}/profile`),
-  };
-  let fileName = user.profile;
-  if (
-    !fileName ||
-    !fs.existsSync(
-      path.join(__dirname, `../public/user/${user.userid}/profile`, fileName)
+  try {
+    var id = req.params.userid;
+    const user = await Usr.findOne(
+      { userid: id },
+      { profile: 1, _id: 0, userid: 1 }
     )
-  ) {
-    options = {
-      root: path.join(__dirname, "../public/user/default/"),
+      .then((res) => {
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
+    let options = {
+      root: path.join(__dirname, `../public/user/${user.userid}/profile`),
     };
-    fileName = "pic.png";
+    let fileName = user.profile;
+    if (
+      !fileName ||
+      !fs.existsSync(
+        path.join(__dirname, `../public/user/${user.userid}/profile`, fileName)
+      )
+    ) {
+      options = {
+        root: path.join(__dirname, "../public/user/default/"),
+      };
+      fileName = "pic.png";
+    }
+    res.sendFile(fileName, options);
+  } catch (error) {
+    res.status(400).json("some error occured");
   }
-  res.sendFile(fileName, options);
 };
 
 exports.send_pp = async (req, res) => {
-  const user = req.user;
-  let options = {
-    root: path.join(__dirname, `../public/user/${user.userid}/profile`),
-  };
-  let fileName = user.profile;
-  if (
-    !fileName ||
-    !fs.existsSync(
-      path.join(__dirname, `../public/user/${user.userid}/profile`, fileName)
-    )
-  ) {
-    options = {
-      root: path.join(__dirname, "../public/user/default/"),
+  try {
+    const user = req.user;
+    let options = {
+      root: path.join(__dirname, `../public/user/${user.userid}/profile`),
     };
-    fileName = "pic.png";
+    let fileName = user.profile;
+    if (
+      !fileName ||
+      !fs.existsSync(
+        path.join(__dirname, `../public/user/${user.userid}/profile`, fileName)
+      )
+    ) {
+      options = {
+        root: path.join(__dirname, "../public/user/default/"),
+      };
+      fileName = "pic.png";
+    }
+    res.sendFile(fileName, options);
+  } catch (error) {
+    res.status(400).json("some error occured");
   }
-  res.sendFile(fileName, options);
 };
 
 exports.send_co = async (req, res) => {
-  var id = req.params.userid;
-  const user = await Usr.findOne(
-    { userid: id },
-    { cover: 1, _id: 0, userid: 1 }
-  )
-    .then((res) => {
-      return res;
-    })
-    .catch((err) => {
-      throw new Error(err);
-    });
-  let options = {
-    root: path.join(__dirname, `../public/user/${user.userid}/cover`),
-  };
-  let fileName = user.cover;
-  if (
-    !fileName ||
-    !fs.existsSync(
-      path.join(__dirname, `../public/user/${user.userid}/cover`, fileName)
+  try {
+    var id = req.params.userid;
+    const user = await Usr.findOne(
+      { userid: id },
+      { cover: 1, _id: 0, userid: 1 }
     )
-  ) {
-    options = {
-      root: path.join(__dirname, "../public/user/default/"),
+      .then((res) => {
+        return res;
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
+    let options = {
+      root: path.join(__dirname, `../public/user/${user.userid}/cover`),
     };
-    fileName = "pic.png";
+    let fileName = user.cover;
+    if (
+      !fileName ||
+      !fs.existsSync(
+        path.join(__dirname, `../public/user/${user.userid}/cover`, fileName)
+      )
+    ) {
+      options = {
+        root: path.join(__dirname, "../public/user/default/"),
+      };
+      fileName = "pic.png";
+    }
+    res.sendFile(fileName, options);
+  } catch (error) {
+    res.status(400).json("some error occured");
   }
-  res.sendFile(fileName, options);
 };
 
 exports.send_cp = async (req, res) => {
-  const user = req.user;
-  let options = {
-    root: path.join(__dirname, `../public/user/${user.userid}/cover`),
-  };
-  let fileName = user.cover;
-  if (
-    !fileName ||
-    !fs.existsSync(
-      path.join(__dirname, `../public/user/${user.userid}/cover`, fileName)
-    )
-  ) {
-    options = {
-      root: path.join(__dirname, "../public/user/default/"),
+  try {
+    const user = req.user;
+    let options = {
+      root: path.join(__dirname, `../public/user/${user.userid}/cover`),
     };
-    fileName = "pic.png";
+    let fileName = user.cover;
+    if (
+      !fileName ||
+      !fs.existsSync(
+        path.join(__dirname, `../public/user/${user.userid}/cover`, fileName)
+      )
+    ) {
+      options = {
+        root: path.join(__dirname, "../public/user/default/"),
+      };
+      fileName = "pic.png";
+    }
+    res.sendFile(fileName, options);
+  } catch (error) {
+    res.status(400).json("some error occured");
   }
-  res.sendFile(fileName, options);
 };
 
 exports.post = async (req, res) => {
@@ -404,6 +684,15 @@ exports.post = async (req, res) => {
         );
       }
       const filename = req.files.file.name;
+      if (
+        !["jpg", "jpeg", "png", "gif", "webp", "svg"].some(
+          (itm) => itm == filename.split(".")[1].toLowerCase()
+        )
+      ) {
+        return res
+          .status(400)
+          .json({ result: false, message: "invalid image" });
+      }
       var name =
         (await randomstring.generate(15)) + "." + filename.split(".")[1];
       let paths = __dirname + `/../public/user/${user.userid}/post/` + name;
@@ -451,7 +740,6 @@ exports.post = async (req, res) => {
       });
     return res.status(201).json({ result: true, post: obj });
   } catch (error) {
-    console.log(error);
     res.status(400).json({ result: false, error: "some error occured" });
   }
 };
@@ -604,5 +892,163 @@ exports.delete_post = async (req, res) => {
       .json({ result: true, message: "post deleted successfully" });
   } catch (error) {
     res.status(400).json({ result: false, message: "some error occured" });
+  }
+};
+
+exports.like_post = async (req, res) => {
+  try {
+    const user = req.user;
+    const { postid } = req.body;
+    const pst = await Post.findOne({ postid })
+      .then((res) => res)
+      .catch((err) => {
+        throw new Error(err);
+      });
+    let edt = pst.likes;
+    let obj, actn;
+    if (edt.some((itm) => itm.userid == user.userid)) {
+      edt = edt.filter((itm) => itm.userid !== user.userid);
+      obj = {
+        "stats.likes": pst.stats.likes - 1,
+        likes: edt,
+      };
+      actn = "disliked";
+    } else {
+      edt.push({
+        fullName: user.fullName,
+        userid: user.userid,
+        on: new Date(),
+      });
+      obj = {
+        "stats.likes": pst.stats.likes + 1,
+        likes: edt,
+      };
+      actn = "liked";
+    }
+
+    const update = await Post.updateOne({ postid }, obj)
+      .then((res) => res)
+      .catch((err) => {
+        throw new Error(err);
+      });
+    return res.status(200).json({ result: true, message: actn });
+  } catch (error) {
+    res.status(400).json({ result: false, message: "some error occured" });
+  }
+};
+
+exports.crt_eve = async (req, res) => {
+  try {
+    const { fullName, userid } = req.user;
+    const { text, date_time, location, type, registration, lnk } = JSON.parse(
+      req.body.data
+    );
+    if (!isDate(new Date(date_time))) {
+      throw new Error("Please enter a valid date & time");
+    } else if (!["gathering", "competition"].some((itm) => itm == type)) {
+      throw new Error("Invalid event type selected");
+    } else if (![false, true].some((itm) => itm == registration)) {
+      throw new Error("Invalid request");
+    } else if (registration) {
+      if (!isURL(lnk)) {
+        throw new Error("please enter a valid Registration link");
+      }
+    }
+    let obj = {
+      eveid: uniqid("eve-"),
+      text,
+      fullName,
+      userid,
+      location,
+      date_time,
+      type,
+      registration,
+      lnk,
+      on: new Date(),
+    };
+    if (req.files) {
+      const image = req.files.image;
+      const filename =
+        randomstring.generate(15) + "." + req.files.image.name.split(".")[1];
+      obj = {
+        ...obj,
+        Media: [
+          {
+            MDT: "T1",
+            url: filename,
+          },
+        ],
+      };
+      if (!fs.existsSync(path.join(__dirname, `../public/events`))) {
+        fs.mkdirSync(path.join(__dirname, `../public/events`));
+      }
+      if (
+        !["jpg", "jpeg", "png", "gif", "webp", "svg"].some(
+          (itm) => itm == filename.split(".")[1].toLowerCase()
+        )
+      ) {
+        return res
+          .status(400)
+          .json({ result: false, message: "invalid image" });
+      }
+      let paths = __dirname + `/../public/events/` + filename;
+
+      image.mv(paths, (err) => {
+        if (err) {
+          return res.send(err);
+        }
+      });
+    }
+    const evnt = new Event(obj);
+    const save = await evnt
+      .save()
+      .then((res) => res)
+      .catch((err) => {
+        throw new Error(err);
+      });
+    return res
+      .status(201)
+      .json({ result: true, message: "Event shared successfully" });
+  } catch (err) {
+    if (err.name === "TypeError") {
+      return res
+        .status(400)
+        .json({ result: false, error: "Please fill all the required field's" });
+    } else {
+      return res.status(500).json({ result: false, message: err.message });
+    }
+  }
+};
+
+// === === === send events === === === //
+
+exports.get_event = async (req, res) => {
+  try {
+    const events = await Event.find()
+      .then((res) => res)
+      .catch((err) => {
+        throw new Error("some error occured");
+      });
+    return res.status(200).json({ result: true, data: events });
+  } catch (error) {
+    return res.status(400).json(error.message);
+  }
+};
+
+exports.send_evec = async (req, res) => {
+  try {
+    var url = req.params.url;
+    let options = {
+      root: path.join(__dirname, `../public/events`),
+    };
+    if (!url) {
+      throw new Error("Invalid Request");
+    } else if (!fs.existsSync(path.join(__dirname, `../public/events`, url))) {
+      throw new Error("Not Found");
+    }
+    res.sendFile(url, options);
+  } catch (error) {
+    console.log(error)
+    res.status(400).json(error.message);
   }
 };

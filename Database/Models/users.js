@@ -24,6 +24,10 @@ const usr = new mongoose.Schema({
     type: String,
     required: true,
   },
+  verified: {
+    type: Boolean,
+    require: true,
+  },
   registeredon: {
     type: Date,
     default: Date.now(),

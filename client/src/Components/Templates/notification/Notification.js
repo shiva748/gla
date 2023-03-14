@@ -22,11 +22,11 @@ const Notification = () => {
                 <div className="ntftn_btn">
                   <button className="ac_btn btn_hv">
                     {" "}
-                    <i class="fa-solid fa-check mark" />
+                    <i className="fa-solid fa-check mark" />
                     Accept
                   </button>
                   <button className="de_btn btn_hv">
-                    <i class="fa-solid fa-x mark" />
+                    <i className="fa-solid fa-x mark" />
                     Decline
                   </button>
                 </div>

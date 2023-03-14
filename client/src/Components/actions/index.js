@@ -1,14 +1,8 @@
-export const signup_ope = () => {
+export const signup_tog = (data) => {
   return {
     for: "toggle_singup",
-    type: "open",
-  };
-};
-
-export const signup_clo = () => {
-  return {
-    for: "toggle_singup",
-    type: "close",
+    type: "edit",
+    data,
   };
 };
 
@@ -18,6 +12,10 @@ export const hdl_lgn_data = (e) => {
 
 export const hdl_sgn_data = (e) => {
   return { for: "signup", event: e, type: "edit" };
+};
+
+export const sgn_edt = (data) => {
+  return { for: "signup", type: "edit_1", data: data };
 };
 
 export const clean_sgn = () => {
@@ -34,77 +32,93 @@ export const fll_lgn = (data) => {
     data: { email: data.email, password: data.password },
   };
 };
-export const process_tog = (of)=>{
+export const process_tog = (of) => {
   return {
     for: of,
-    type: "process"
+    type: "process",
   };
-}
+};
 
-export const validate = (data)=>{
+export const validate = (data) => {
   return {
     for: "userdata",
     type: "validate",
-    data:data,
+    data: data,
   };
-}
+};
 
-export const Profile_tog = ()=>{
+export const Profile_tog = () => {
   return {
-    for:"profile",
-    type:"Profileoc"
-  }
-}
+    for: "profile",
+    type: "Profileoc",
+  };
+};
 
-export const Profile_sele = (data)=>{
+export const Profile_sele = (data) => {
   return {
-    for:"profile",
-    type:"select",
-    data
-  }
-}
-export const Cover_tog = ()=>{
+    for: "profile",
+    type: "select",
+    data,
+  };
+};
+export const Cover_tog = () => {
   return {
-    for:"cover",
-    type:"Coveroc"
-  }
-}
+    for: "cover",
+    type: "Coveroc",
+  };
+};
 
-export const Cover_sele = (data)=>{
+export const Cover_sele = (data) => {
   return {
-    for:"cover",
-    type:"select",
-    data
-  }
-}
-export const post_edt = (data)=>{
+    for: "cover",
+    type: "select",
+    data,
+  };
+};
+export const post_edt = (data) => {
   return {
-    for:"post",
-    type:"edit",
-    data
-  }
-}
+    for: "post",
+    type: "edit",
+    data,
+  };
+};
 
-export const ntftn_edt = (data)=>{
+export const ntftn_edt = (data) => {
   return {
-    for:"notification",
-    type:"edit",
-    data
-  }
-}
+    for: "notification",
+    type: "edit",
+    data,
+  };
+};
 
-export const optn_edt = (data)=>{
+export const optn_edt = (data) => {
   return {
-    for:"option",
-    type:"edit",
-    data
-  }
-}
+    for: "option",
+    type: "edit",
+    data,
+  };
+};
 
-export const posts_edt = (data)=>{
+export const posts_edt = (data) => {
   return {
-    for:"posts",
-    type:"edit",
-    data
-  }
-}
+    for: "posts",
+    type: "edit",
+    data,
+  };
+};
+
+export const hdl_event_data = (e) => {
+  return { for: "event", event: e, type: "edt" };
+};
+
+export const put_event = (data) => {
+  return { for: "event", type: "put", data: data };
+};
+
+export const events_edt = (data) => {
+  return {
+    for: "events",
+    type: "edit",
+    data,
+  };
+};

@@ -33,7 +33,7 @@ const Option = () => {
           className="Optn_dt ovrly-ad"
           style={{ margin: "4px 0px" }}
         >
-          <i class="fa-solid fa-right-from-bracket" />
+          <i className="fa-solid fa-right-from-bracket" />
           <p className="Optn_txt">Logout</p>
         </div>
       </div>

@@ -64,7 +64,9 @@ export default function Share() {
             />
             <i
               className="fa-sharp fa-solid fa-xmark shareCancelImg"
-              onClick={() => setFile(null)}
+              onClick={() => {
+                dispatch(post_edt({ files: "" }));
+              }}
             />
           </div>
         ) : (
@@ -80,9 +82,13 @@ export default function Share() {
                 type="file"
                 id="file"
                 accept=".png,.jpeg,.jpg"
-                onChange={(e) =>
-                  dispatch(post_edt({ files: e.target.files[0] }))
-                }
+                onClick={(e) => {
+                  e.target.value = ""
+                }}
+                onChange={(e) => {
+                  dispatch(post_edt({ files: e.target.files[0] }));
+                  e.target.files = null;
+                }}
               />
             </label>
             <label htmlFor="visiblity" className="shareOption">

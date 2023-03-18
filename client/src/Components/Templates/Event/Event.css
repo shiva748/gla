@@ -1,0 +1,21 @@
+.my-table {
+    border: 1px solid rgb(104, 104, 104);
+    width: 90%;
+    margin: auto;
+    border-collapse: collapse;
+    margin: 10px calc(10%/2);
+  }
+  
+  .my-table th,
+  .my-table td {
+    border: 1px solid rgb(104, 104, 104);
+    padding: 10px;
+    text-align: center;
+  }
+  
+  @media screen and (max-width: 600px) {
+    .my-table {
+      width: 100%;
+    }
+  }
+  

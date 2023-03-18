@@ -1,0 +1,79 @@
+.ntfn_tab {
+  height: 550px;
+  width: 280px;
+  position: absolute;
+  padding: 0px 2px;
+  top: 33px;
+  left: -135px;
+  background-color: white;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+.ntfn_dt {
+  padding: 5px;
+  height: 80px;
+  display: flex;
+  flex-direction: row;
+  margin-top: 3px;
+  border-radius: 4px;
+  box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+}
+.arr {
+  height: 50px;
+  width: 32px;
+  background-color: white;
+  position: absolute;
+  top: 25px;
+  right: 11px;
+  transform: rotate(45deg);
+  border: solid 1px grey;
+}
+.prfl_cn{
+  height: 100%;
+  width: 70px;
+  padding: 5px;
+}
+.prfl_cn img{
+  height: calc(100% - 10px);
+  width: calc(100% - 10px);
+  border-radius: 50%;
+}
+.ntftn_dt{
+  width: calc(100% - 70px);
+}
+.ntftn_txt{
+  height: 35px;
+  color: rgb(0, 0, 0);
+  font-size: 12px;
+}
+.ntftn_btn{
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+.ntftn_hd{
+  color: black;
+  padding: 5px 10px;
+}
+.ac_btn{
+  border: none;
+  background-color: lightgreen;
+  color: white;
+  padding: 5px;
+}
+.de_btn{
+  border: none;
+  background-color: rgb(240, 74, 74);
+  color: white;
+  padding: 5px;
+}
+.mark{
+  margin: 0px 4px;
+}
+.btn_hv{
+  transition: all 0.5s;
+}
+
+.btn_hv:hover{
+  transform: scale(0.9);
+}

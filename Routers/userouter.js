@@ -78,4 +78,6 @@ Routers.post("/jobs", authenticate, usercont.getjobs);
 
 Routers.get("/jobs/content/:url", authenticate, usercont.send_jobc);
 
+Routers.post("/chat/new", authenticate, usercont.create_chat);
+
 module.exports = Routers;

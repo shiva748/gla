@@ -3,20 +3,24 @@ import Topbar from "../Templates/Topbar/Topbar";
 import Sidebar from "../Templates/Sidebar/Sidebar";
 import Feed from "../Templates/Feed/Feed";
 import Rightbar from "../Templates/Rightbar/Rightbar";
+import { useHistory } from "react-router";
 import { useParams } from "react-router";
 import Popup from "../Templates/Profile/Profile";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-
 import React, { useState, useEffect } from "react";
+import { chat_edt } from "../actions";
 
 const Oprofile = () => {
+  const history = useHistory();
   const dispatch = useDispatch();
   const { userid } = useParams();
   const user = useSelector((state) => state.userdata);
+  const Chat = useSelector((state) => state.Chat);
   const profile = useSelector((state) => state.profile);
   const [load, setload] = useState(true);
   const [prfl, setprfl] = useState({});
+
   const getpro = async () => {
     try {
       const response = await fetch(`/api/profile/${userid}`, {
@@ -106,6 +110,33 @@ const Oprofile = () => {
                         });
                       setload(false);
                     }
+                  }}
+                />
+              </div>
+              <div
+                className="button my-anchor-element"
+                style={{
+                  backgroundColor: "lightgreen",
+                  right: "80px",
+                  fontSize: "20px",
+                  background: "tomato",
+                }}
+              >
+                <i
+                  className={"fa-solid fa-message"}
+                  onClick={async () => {
+                    alert("hello");
+                    const postData = {
+                      userid,
+                    };
+                    await axios
+                      .post("/api/chat/new", postData)
+                      .then((response) => {
+                        history.push("/chats");
+                      })
+                      .catch((error) => {
+                        console.error(error);
+                      });
                   }}
                 />
               </div>

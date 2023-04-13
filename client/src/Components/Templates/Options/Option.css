@@ -39,3 +39,11 @@
 .Optn_dt:hover{
   background-color: rgb(237, 237, 237);
 }
+.to_hide{
+  display: none;
+}
+@media only screen and (max-width: 840px) {
+  .to_hide{
+    display: block;
+  }
+}

@@ -11,10 +11,12 @@ export default function Sidebar() {
               <span className="sidebarListItemText">Feed</span>
             </li>
           </NavLink>
+          <NavLink to="/chats" style={{ textDecoration: "none", color: "black" }}>
           <li className="sidebarListItem ovrly-ad">
             <i className="fa-solid fa-comment sidebarIcon" />
             <span className="sidebarListItemText">Chats</span>
           </li>
+          </NavLink>
           <NavLink
             to="/jobs"
             style={{ textDecoration: "none", color: "black" }}

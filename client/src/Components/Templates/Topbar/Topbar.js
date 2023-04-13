@@ -40,7 +40,7 @@ const Topbar = () => {
           <span className="topbarLink">Homepage</span>
           <span className="topbarLink">Timeline</span>
         </div>
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative", visibility:"hidden" }}>
           <div
             className="topbarIcons"
             onClick={() => {

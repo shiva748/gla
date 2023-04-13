@@ -13,6 +13,7 @@ import {
   Events,
   Job,
   Jobs,
+  Chat,
 } from "./function";
 import { combineReducers } from "redux";
 
@@ -31,5 +32,6 @@ const rootReducer = combineReducers({
   Events,
   Job,
   Jobs,
+  Chat,
 });
 export default rootReducer;

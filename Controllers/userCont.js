@@ -13,6 +13,8 @@ const Event = require("../Database/Models/eve");
 const Job = require("../Database/Models/job");
 const { isDate } = require("util/types");
 const { default: isURL } = require("validator/lib/isURL");
+const Chat = require("../Database/Models/chat");
+const { Console } = require("console");
 // === === === home === === === //
 
 exports.home = async (req, res) => {
@@ -1262,3 +1264,54 @@ exports.send_jobc = async (req, res) => {
     res.status(400).json(error.message);
   }
 };
+exports.create_chat = async (req, res) => {
+  try {
+    const { userid } = req.body;
+    const user = req.user;
+    const isuser = await Usr.findOne({
+      userid,
+    })
+      .then((res) => res)
+      .catch((err) => {
+        throw new Error(err);
+      });
+    if (isuser) {
+      const isChat = await Chat.findOne({
+        "users.userid": {
+          $all: [user.userid, isuser.userid],
+        },
+      });
+      if (!isChat) {
+        const chatid = uniqid("chat-");
+        const obj = new Chat({
+          chatid,
+          users: [
+            { userid: user.userid, fullName: user.fullName },
+            { userid: isuser.userid, fullName: isuser.fullName },
+          ],
+          on: new Date(),
+          Message: [],
+        });
+        const save = await obj
+          .save()
+          .then((res) => res)
+          .catch((err) => {
+            throw new Error(err);
+          });
+        return res
+          .status(200)
+          .json({ result: true, message: "created successfully", chatid });
+      }
+    } else {
+      return res.status(200).json({
+        result: true,
+        message: "already exist",
+        chatid: isChat.chatid,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ result: false, message: error.message });
+  }
+};
+// exports.get_chat = async(req, res)=>{}

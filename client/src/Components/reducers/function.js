@@ -268,3 +268,15 @@ export const Jobs = (state = jobs, action) => {
     return state;
   }
 };
+const chat = {
+  selectedchat: "",
+  data: {},
+  chats:[],
+};
+export const Chat = (state = chat, action) => {
+  if (action.for === "chat") {
+    state = { ...state, ...action.data };
+  } else {
+    return state;
+  }
+};

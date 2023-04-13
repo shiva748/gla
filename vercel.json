@@ -1,10 +1,25 @@
 {
-    "version": 2,
-    "name": "gla",
-    "builds": [
-       { "src": "app.js", "use": "@vercel/node" }
-    ],
-    "routes": [
-       { "src": "/(.*)", "dest": "/app.js" }
-    ]
+   "version": 2,
+   "name": "gla",
+   "builds": [
+     {
+       "src": "server/**",
+       "use": "@vercel/node"
+     },
+     {
+       "src": "client/**",
+       "use": "@vercel/static"
+     }
+   ],
+   "routes": [
+     {
+       "src": "/api/(.*)",
+       "dest": "server/index.js"
+     },
+     {
+       "src": "/(.*)",
+       "dest": "client/$1"
+     }
+   ]
  }
+ 

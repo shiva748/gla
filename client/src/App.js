@@ -9,6 +9,7 @@ import Profile from "./Components/Pages/Profile";
 import Oprofile from "./Components/Pages/Oprofile";
 import Events from "./Components/Pages/Events";
 import Jobs from "./Components/Pages/Jobs";
+import Chat from "./Components/Pages/Chat";
 
 const App = () => {
   const right = useSelector((state) => state.userdata);
@@ -35,6 +36,9 @@ const App = () => {
               </Route>
               <Route exact path="/jobs">
                 <Jobs />
+              </Route>
+              <Route exact path="/chats">
+                <Chat />
               </Route>
             </Switch>
           ) : (

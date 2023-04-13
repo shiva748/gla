@@ -24,6 +24,33 @@ const Option = () => {
           </div>
         </NavLink>
         <hr />
+        <div className="to_hide">
+        <NavLink to="/" style={{ textDecoration: "none", color: "black" }}>
+          <div className="Optn_dt ovrly-ad" style={{ margin: "4px 0px" }}>
+            <i className="fa-sharp fa-solid fa-rss sidebarIcon" />
+            <p className="Optn_txt">Feed</p>
+          </div>
+        </NavLink>
+        <NavLink to="/chats" style={{ textDecoration: "none", color: "black" }}>
+          <div className="Optn_dt ovrly-ad" style={{ margin: "4px 0px" }}>
+            <i className="fa-solid fa-comment sidebarIcon" />
+            <p className="Optn_txt">Chat</p>
+          </div>
+        </NavLink>
+        <NavLink to="/jobs" style={{ textDecoration: "none", color: "black" }}>
+          <div className="Optn_dt ovrly-ad" style={{ margin: "4px 0px" }}>
+            <i className="fa-sharp fa-solid fa-briefcase sidebarIcon" />
+            <p className="Optn_txt">Jobs</p>
+          </div>
+        </NavLink>
+        <NavLink to="/event" style={{ textDecoration: "none", color: "black" }}>
+          <div className="Optn_dt ovrly-ad" style={{ margin: "4px 0px" }}>
+            <i className="fa-solid fa-calendar-days sidebarIcon" />
+            <p className="Optn_txt">Event</p>
+          </div>
+        </NavLink>
+        <hr />
+        </div>
         <div
           onClick={() => {
             axios.get("/api/logout");

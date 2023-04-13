@@ -135,3 +135,9 @@ export const jobs_edt = (data) => {
     data,
   };
 };
+export const chat_edt = (data) => {
+  return {
+    for: "chat",
+    data,
+  };
+};
